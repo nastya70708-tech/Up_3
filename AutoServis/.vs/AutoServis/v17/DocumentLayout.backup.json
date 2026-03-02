@@ -1,7 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Xonop\\Up_3\\AutoServis\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +14,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{26341fe2-71dd-46fd-bb1b-2e51a92a0d64}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\appsettings.json",
+              "RelativeDocumentMoniker": "AutoServis\\appsettings.json",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\appsettings.json",
+              "RelativeToolTip": "AutoServis\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-03-02T14:36:22.832Z",
+              "EditorCaption": ""
             }
           ]
         },
