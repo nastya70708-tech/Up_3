@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявки на ремонт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-link">← На главную</a>
+            <h1>Управление заявками на ремонт</h1>
+            <div id="userRoleInfo" style="margin-top: 10px;"></div>
+        </header>
+
+        <div id="notifications"></div>
+
+        <div class="section-header">
+            <h2 id="requestsTitle">Список заявок</h2>
+            <button class="btn btn-primary" onclick="showAddForm()" id="addButton" style="display: none;">+ Новая заявка</button>
+        </div>
+
+        <!-- Форма добавления/редактирования (только для мастеров) -->
+        <div id="formContainer" class="form-container" style="display: none;">
+            <h3 id="formTitle">Новая заявка</h3>
+            <form id="requestForm">
+                <input type="hidden" id="requestId">
+
+                <div class="form-group">
+                    <label for="startDate">Дата добавления:</label>
+                    <input type="date" id="startDate" required>
+                </div>
+
+                <div class="form-group" id="clientSelectGroup">
+                    <label for="clientId">Клиент:</label>
+                    <select id="clientId" required>
+                        <option value="">Выберите клиента...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="masterId">Ответственный мастер:</label>
+                    <select id="masterId" required>
+                        <option value="">Выберите мастера...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="carType">Вид авто:</label>
+                    <input type="text" id="carType" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="carModel">Модель авто:</label>
+                    <input type="text" id="carModel" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="problemDescryption">Описание проблемы:</label>
+                    <textarea id="problemDescryption" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="requestStatus">Статус заявки:</label>
+                    <select id="requestStatus" required>
+                        <option value="Новая заявка">Новая заявка</option>
+                        <option value="В процессе ремонта">В процессе ремонта</option>
+                        <option value="Ожидание автозапчастей">Ожидание автозапчастей</option>
+                        <option value="Готова к выдаче">Готова к выдаче</option>
+                        <option value="Завершена">Завершена</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="completionDate">Дата завершения:</label>
+                    <input type="date" id="completionDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="repairParts">Заказанные автозапчасти и материалы:</label>
+                    <textarea id="repairParts"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Таблица заявок -->
+        <div class="table-container">
+            <table id="requestsTable">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Клиент</th>
+                        <th>Авто</th>
+                        <th>Проблема</th>
+                        <th>Мастер</th>
+                        <th>Статус</th>
+                        <th>Запчасти</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <tr>
+                        <td colspan="9">Загрузка...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Секция статистики (только для мастеров) -->
+        <div id="statisticsSection" class="info-section" style="display: none;">
+            <h3>Статистика</h3>
+            <div id="statistics">
+                <p>Количество выполненных заявок: <span id="completedCount">0</span></p>
+                <p>Среднее время выполнения: <span id="avgTime">-</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentUser = null;
+        let isMaster = false;
+
+        // Загрузка информации о пользователе
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (!response.ok) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+
+                currentUser = await response.json();
+                isMaster = currentUser.role === 'master';
+
+                // Отображаем роль
+                document.getElementById('userRoleInfo').innerHTML = `
+                            <p>Вы вошли как: <strong>${currentUser.name}</strong> (${isMaster ? '🔧 Мастер' : '👤 Клиент'})</p>
+                        `;
+
+                // Показываем/скрываем элементы в зависимости от роли
+                if (isMaster) {
+                    document.getElementById('addButton').style.display = 'inline-block';
+                    document.getElementById('statisticsSection').style.display = 'block';
+                    document.getElementById('requestsTitle').textContent = 'Все заявки';
+                } else {
+                    document.getElementById('clientSelectGroup').style.display = 'none';
+                    document.getElementById('requestsTitle').textContent = 'Мои заявки';
+                }
+
+                return true;
+            } catch (error) {
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // Загрузка данных при открытии страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authed = await checkAuth();
+            if (authed) {
+                loadRequests();
+                if (isMaster) {
+                    loadSelectOptions('clientId', '/api/clients', 'userID', 'fio');
+                }
+                loadSelectOptions('masterId', '/api/masters', 'masterID', 'fio');
+            }
+        });
+
+        // Загрузка списка заявок
+        async function loadRequests() {
+            try {
+                const requests = await apiRequest('/api/requests');
+                const clients = await apiRequest('/api/clients');
+                const masters = await apiRequest('/api/masters');
+
+                const clientsMap = new Map(clients.map(c => [c.userID, c]));
+                const mastersMap = new Map(masters.map(m => [m.masterID, m]));
+
+                const tbody = document.getElementById('requestsTableBody');
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9">Нет заявок</td></tr>';
+                    return;
+                }
+
+                let completedCount = 0;
+                let totalDays = 0;
+
+                tbody.innerHTML = requests.map(request => {
+                    const client = clientsMap.get(request.clientID);
+                    const master = mastersMap.get(request.masterID);
+
+                    // Расчет статистики для выполненных заявок
+                    if (isMaster && request.requestStatus === 'Завершена' && request.completionDate) {
+                        completedCount++;
+                        const start = new Date(request.startDate);
+                        const end = new Date(request.completionDate);
+                        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                        totalDays += days;
+                    }
+
+                    // Определение класса для статуса
+                    let statusClass = '';
+                    switch (request.requestStatus) {
+                        case 'Новая заявка': statusClass = 'status-new'; break;
+                        case 'В процессе ремонта': statusClass = 'status-progress'; break;
+                        case 'Ожидание автозапчастей': statusClass = 'status-waiting'; break;
+                        case 'Готова к выдаче': statusClass = 'status-progress'; break;
+                        case 'Завершена': statusClass = 'status-completed'; break;
+                    }
+
+                    // Кнопки действий в зависимости от роли
+                    let actionButtons = '';
+                    if (isMaster) {
+                        actionButtons = `
+                                    <button onclick="editRequest(${request.requestID})">✏️</button>
+                                    <button onclick="deleteRequest(${request.requestID})">🗑️</button>
+                                    <button onclick="viewComments(${request.requestID})">💬</button>
+                                `;
+                    } else {
+                        actionButtons = `
+                                    <button onclick="viewComments(${request.requestID})">💬 Просмотр комментариев</button>
+                                `;
+                    }
+
+                    return `
+                                <tr>
+                                    <td>${request.requestID}</td>
+                                    <td>${formatDate(request.startDate)}</td>
+                                    <td>${client ? client.fio : 'Неизвестно'}</td>
+                                    <td>${request.carType} ${request.carModel}</td>
+                                    <td>${request.problemDescryption.substring(0, 50)}${request.problemDescryption.length > 50 ? '...' : ''}</td>
+                                    <td>${master ? master.fio : 'Не назначен'}</td>
+                                    <td class="${statusClass}">${request.requestStatus}</td>
+                                    <td>${request.repairParts ? request.repairParts.substring(0, 30) + (request.repairParts.length > 30 ? '...' : '') : '-'}</td>
+                                    <td class="actions">${actionButtons}</td>
+                                </tr>
+                            `;
+                }).join('');
+
+                // Обновление статистики для мастеров
+                if (isMaster) {
+                    document.getElementById('completedCount').textContent = completedCount;
+                    document.getElementById('avgTime').textContent =
+                        completedCount > 0 ? Math.round(totalDays / completedCount) + ' дн.' : '-';
+                }
+
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+                document.getElementById('requestsTableBody').innerHTML =
+                    '<tr><td colspan="9">Ошибка загрузки данных</td></tr>';
+            }
+        }
+
+        // Показать форму добавления (только для мастеров)
+        function showAddForm() {
+            if (!isMaster) return;
+
+            document.getElementById('formTitle').textContent = 'Новая заявка';
+            document.getElementById('requestForm').reset();
+            document.getElementById('requestId').value = '';
+            document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function hideForm() {
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+        // Редактирование заявки (только для мастеров)
+        async function editRequest(id) {
+            if (!isMaster) return;
+
+            try {
+                const request = await apiRequest(`/api/requests/${id}`);
+
+                document.getElementById('formTitle').textContent = 'Редактирование заявки №' + id;
+                document.getElementById('requestId').value = request.requestID;
+                document.getElementById('startDate').value = request.startDate.split('T')[0];
+                document.getElementById('carType').value = request.carType;
+                document.getElementById('carModel').value = request.carModel;
+                document.getElementById('problemDescryption').value = request.problemDescryption;
+                document.getElementById('requestStatus').value = request.requestStatus;
+                document.getElementById('completionDate').value = request.completionDate ? request.completionDate.split('T')[0] : '';
+                document.getElementById('repairParts').value = request.repairParts || '';
+                document.getElementById('masterId').value = request.masterID;
+                if (isMaster) {
+                    document.getElementById('clientId').value = request.clientID;
+                }
+
+                document.getElementById('formContainer').style.display = 'block';
+            } catch (error) {
+                showNotification('Ошибка загрузки заявки', 'error');
+            }
+        }
+
+        // Сохранение заявки
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const requestData = {
+                requestID: document.getElementById('requestId').value ? parseInt(document.getElementById('requestId').value) : 0,
+                startDate: document.getElementById('startDate').value,
+                carType: document.getElementById('carType').value,
+                carModel: document.getElementById('carModel').value,
+                problemDescryption: document.getElementById('problemDescryption').value,
+                requestStatus: document.getElementById('requestStatus').value,
+                completionDate: document.getElementById('completionDate').value || null,
+                repairParts: document.getElementById('repairParts').value || null,
+                masterID: parseInt(document.getElementById('masterId').value),
+                clientID: isMaster ? parseInt(document.getElementById('clientId').value) : parseInt(currentUser.id)
+            };
+
+            try {
+                if (requestData.requestID) {
+                    // Обновление
+                    await apiRequest('/api/requests', 'PUT', requestData);
+                    showNotification('Заявка обновлена');
+                } else {
+                    // Создание
+                    delete requestData.requestID;
+                    await apiRequest('/api/requests', 'POST', requestData);
+                    showNotification('Заявка создана');
+                }
+
+                hideForm();
+                loadRequests();
+            } catch (error) {
+                showNotification('Ошибка сохранения', 'error');
+            }
+        });
+
+        // Удаление заявки (только для мастеров)
+        async function deleteRequest(id) {
+            if (!isMaster) return;
+            if (!confirm('Удалить заявку?')) return;
+
+            try {
+                await apiRequest(`/api/requests/${id}`, 'DELETE');
+                showNotification('Заявка удалена');
+                loadRequests();
+            } catch (error) {
+                showNotification('Ошибка удаления', 'error');
+            }
+        }
+
+        // Переход к комментариям
+        function viewComments(requestId) {
+            window.location.href = `comments.html?requestId=${requestId}`;
+        }
+    </script>
+</body>
+</html>

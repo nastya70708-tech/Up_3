@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему - Автосервис</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form button {
+            width: 100%;
+            padding: 10px;
+        }
+
+        .test-accounts {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+
+        .account-table {
+            width: 100%;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+            .account-table td {
+                padding: 8px;
+                border-bottom: 1px solid #eee;
+            }
+
+            .account-table .role {
+                font-weight: bold;
+                color: #0066cc;
+            }
+
+        .note {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .test-btn {
+            background: #e0e0e0;
+            border: 1px solid #999;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+            .test-btn:hover {
+                background: #d0d0d0;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>Автосервис «АвтоТранс»</h1>
+                <p>Вход в систему учета заявок</p>
+            </div>
+
+            <div id="notifications"></div>
+
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="login">Логин:</label>
+                    <input type="text" id="login" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+
+            <div class="test-accounts">
+                <h3>Тестовые учетные записи:</h3>
+
+                <p class="note">
+                    * Мастера: автомеханики, менеджеры и операторы имеют доступ к управлению заявками.<br>
+                    Клиенты могут только создавать заявки и просматривать свои.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setTestAccount(login, password) {
+            document.getElementById('login').value = login;
+            document.getElementById('password').value = password;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const loginData = {
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value
+            };
+
+            console.log('Attempting login with:', loginData);
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(loginData)
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('Login successful:', user);
+                    window.location.href = 'index.html';
+                } else {
+                    console.log('Login failed with status:', response.status);
+                    showNotification('Неверный логин или пароль', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Ошибка подключения к серверу', 'error');
+            }
+        });
+
+        // Функция для уведомлений
+        function showNotification(message, type) {
+            const container = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Проверяем, авторизован ли пользователь
+        (async () => {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                // Игнорируем
+            }
+        })();
+    </script>
+</body>
+</html>

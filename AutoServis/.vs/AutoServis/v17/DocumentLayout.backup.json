@@ -5,6 +5,38 @@
     {
       "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\script.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\client-requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\client-requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\clients.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\clients.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\requests.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|c:\\users\\xonop\\up_3\\autoservis\\autoservis\\wwwroot\\masters.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7C77FAE8-864E-4B93-BE6A-A1F96569DABF}|AutoServis\\AutoServis.csproj|solutionrelative:autoservis\\wwwroot\\masters.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,11 +46,109 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{26341fe2-71dd-46fd-bb1b-2e51a92a0d64}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "client-requests.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\client-requests.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\client-requests.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\client-requests.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\client-requests.html",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAuwLwAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-10T17:10:51.835Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\Program.cs",
+              "RelativeDocumentMoniker": "AutoServis\\Program.cs",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\Program.cs",
+              "RelativeToolTip": "AutoServis\\Program.cs",
+              "ViewState": "AgIAAH0EAAAAAAAAAAAwwIYEAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-02T18:25:15.035Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "index.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\index.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\index.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\index.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\index.html",
+              "ViewState": "AgIAADUAAAAAAAAAAAAAAIwAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-08T21:23:13.204Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "script.js",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\script.js",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\script.js",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\script.js",
+              "RelativeToolTip": "AutoServis\\wwwroot\\script.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-03-10T17:11:21.405Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "clients.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\clients.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\clients.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\clients.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\clients.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAALUAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-11T00:25:12.857Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "requests.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\requests.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\requests.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\requests.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\requests.html",
+              "ViewState": "AgIAAE8BAAAAAAAAAAAuwGkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-10T17:08:10.19Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "login.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\login.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\login.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\login.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\login.html",
+              "ViewState": "AgIAAL8AAAAAAAAAAAAqwNgAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-10T17:02:57.881Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "masters.html",
+              "DocumentMoniker": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\masters.html",
+              "RelativeDocumentMoniker": "AutoServis\\wwwroot\\masters.html",
+              "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\wwwroot\\masters.html",
+              "RelativeToolTip": "AutoServis\\wwwroot\\masters.html",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
+              "WhenOpened": "2026-03-10T22:15:14.54Z"
             },
             {
               "$type": "Document",
@@ -28,7 +158,7 @@
               "RelativeDocumentMoniker": "AutoServis\\appsettings.json",
               "ToolTip": "C:\\Users\\Xonop\\Up_3\\AutoServis\\AutoServis\\appsettings.json",
               "RelativeToolTip": "AutoServis\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABJAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-03-02T14:36:22.832Z",
               "EditorCaption": ""

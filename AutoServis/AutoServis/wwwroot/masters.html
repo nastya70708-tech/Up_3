@@ -1,0 +1,182 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастера</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-link">← На главную</a>
+            <h1>Управление мастерами</h1>
+        </header>
+
+        <div id="notifications"></div>
+
+        <div class="section-header">
+            <h2>Список мастеров</h2>
+            <button class="btn btn-primary" onclick="showAddForm()">+ Новый мастер</button>
+        </div>
+
+        <div id="formContainer" class="form-container" style="display: none;">
+            <h3 id="formTitle">Новый мастер</h3>
+            <form id="masterForm">
+                <input type="hidden" id="masterId">
+
+                <div class="form-group">
+                    <label for="fio">ФИО:</label>
+                    <input type="text" id="fio" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Телефон:</label>
+                    <input type="tel" id="phone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login">Логин:</label>
+                    <input type="text" id="login" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Специализация:</label>
+                    <input type="text" id="type" required placeholder="например: двигатели, электрика, кузовной ремонт">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ФИО</th>
+                        <th>Телефон</th>
+                        <th>Логин</th>
+                        <th>Специализация</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="mastersTableBody">
+                    <tr>
+                        <td colspan="6">Загрузка...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', loadMasters);
+
+        async function loadMasters() {
+            try {
+                const masters = await apiRequest('/api/masters');
+                const tbody = document.getElementById('mastersTableBody');
+
+                if (masters.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6">Нет мастеров</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = masters.map(master => `
+                    <tr>
+                        <td>${master.masterID}</td>
+                        <td>${master.fio}</td>
+                        <td>${master.phone}</td>
+                        <td>${master.login}</td>
+                        <td>${master.type}</td>
+                        <td class="actions">
+                            <button onclick="editMaster(${master.masterID})">✏️</button>
+                            <button onclick="deleteMaster(${master.masterID})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById('formTitle').textContent = 'Новый мастер';
+            document.getElementById('masterForm').reset();
+            document.getElementById('masterId').value = '';
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function hideForm() {
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+        async function editMaster(id) {
+            try {
+                const master = await apiRequest(`/api/masters/${id}`);
+
+                document.getElementById('formTitle').textContent = 'Редактирование мастера';
+                document.getElementById('masterId').value = master.masterID;
+                document.getElementById('fio').value = master.fio;
+                document.getElementById('phone').value = master.phone;
+                document.getElementById('login').value = master.login;
+                document.getElementById('password').value = master.password;
+                document.getElementById('type').value = master.type;
+
+                document.getElementById('formContainer').style.display = 'block';
+            } catch (error) {
+                showNotification('Ошибка загрузки', 'error');
+            }
+        }
+
+        document.getElementById('masterForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const masterData = {
+                masterID: document.getElementById('masterId').value ? parseInt(document.getElementById('masterId').value) : 0,
+                fio: document.getElementById('fio').value,
+                phone: document.getElementById('phone').value,
+                login: document.getElementById('login').value,
+                password: document.getElementById('password').value,
+                type: document.getElementById('type').value
+            };
+
+            try {
+                if (masterData.masterID) {
+                    await apiRequest('/api/masters', 'PUT', masterData);
+                    showNotification('Мастер обновлен');
+                } else {
+                    delete masterData.masterID;
+                    await apiRequest('/api/masters', 'POST', masterData);
+                    showNotification('Мастер добавлен');
+                }
+
+                hideForm();
+                loadMasters();
+            } catch (error) {
+                showNotification('Ошибка сохранения', 'error');
+            }
+        });
+
+        async function deleteMaster(id) {
+            if (!confirm('Удалить мастера?')) return;
+
+            try {
+                await apiRequest(`/api/masters/${id}`, 'DELETE');
+                showNotification('Мастер удален');
+                loadMasters();
+            } catch (error) {
+                showNotification('Ошибка удаления', 'error');
+            }
+        }</script>
+</body>
+</html>

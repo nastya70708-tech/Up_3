@@ -1,0 +1,189 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заявки</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="back-link">← На главную</a>
+            <h1>Мои заявки на ремонт</h1>
+        </header>
+
+        <div id="notifications"></div>
+
+        <div class="section-header">
+            <h2>Список моих заявок</h2>
+            <button class="btn btn-primary" onclick="showAddForm()">+ Новая заявка</button>
+        </div>
+
+        <!-- Форма новой заявки -->
+        <div id="formContainer" class="form-container" style="display: none;">
+            <h3>Новая заявка</h3>
+            <form id="requestForm">
+                <div class="form-group">
+                    <label for="carType">Вид авто:</label>
+                    <input type="text" id="carType" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="carModel">Модель авто:</label>
+                    <input type="text" id="carModel" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="problemDescryption">Описание проблемы:</label>
+                    <textarea id="problemDescryption" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="masterId">Желаемый мастер (необязательно):</label>
+                    <select id="masterId" required>
+                        <option value="">Выберите мастера...</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Отправить заявку</button>
+                    <button type="button" class="btn" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Таблица заявок -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Авто</th>
+                        <th>Проблема</th>
+                        <th>Мастер</th>
+                        <th>Статус</th>
+                        <th>Комментарии</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <tr>
+                        <td colspan="7">Загрузка...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentUser = null;
+
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (!response.ok || (await response.json()).role !== 'client') {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                currentUser = await response.json();
+                return true;
+            } catch (error) {
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authed = await checkAuth();
+            if (authed) {
+                loadRequests();
+                loadSelectOptions('masterId', '/api/masters', 'masterID', 'fio', 'Выберите мастера...');
+            }
+        });
+
+        async function loadRequests() {
+            try {
+                const requests = await apiRequest('/api/requests');
+                const masters = await apiRequest('/api/masters');
+                const mastersMap = new Map(masters.map(m => [m.masterID, m]));
+
+                const tbody = document.getElementById('requestsTableBody');
+
+                if (requests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">У вас пока нет заявок</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = requests.map(request => {
+                    const master = mastersMap.get(request.masterID);
+
+                    let statusClass = '';
+                    switch (request.requestStatus) {
+                        case 'Новая заявка': statusClass = 'status-new'; break;
+                        case 'В процессе ремонта': statusClass = 'status-progress'; break;
+                        case 'Ожидание автозапчастей': statusClass = 'status-waiting'; break;
+                        case 'Готова к выдаче': statusClass = 'status-progress'; break;
+                        case 'Завершена': statusClass = 'status-completed'; break;
+                    }
+
+                    return `
+                                    <tr>
+                                        <td>${request.requestID}</td>
+                                        <td>${formatDate(request.startDate)}</td>
+                                        <td>${request.carType} ${request.carModel}</td>
+                                        <td>${request.problemDescryption}</td>
+                                        <td>${master ? master.fio : 'Не назначен'}</td>
+                                        <td class="${statusClass}">${request.requestStatus}</td>
+                                        <td>
+                                            <button class="btn" onclick="viewComments(${request.requestID})">Просмотр</button>
+                                        </td>
+                                    </tr>
+                                `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function hideForm() {
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+        document.getElementById('requestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const requestData = {
+                startDate: new Date().toISOString().split('T')[0],
+                carType: document.getElementById('carType').value,
+                carModel: document.getElementById('carModel').value,
+                problemDescryption: document.getElementById('problemDescryption').value,
+                requestStatus: 'Новая заявка',
+                completionDate: null,
+                repairParts: null,
+                masterID: parseInt(document.getElementById('masterId').value),
+                clientID: parseInt(currentUser.id)
+            };
+
+            try {
+                await apiRequest('/api/requests', 'POST', requestData);
+                showNotification('Заявка создана');
+                hideForm();
+                document.getElementById('requestForm').reset();
+                loadRequests();
+            } catch (error) {
+                showNotification('Ошибка создания заявки', 'error');
+            }
+        });
+
+        function viewComments(requestId) {
+            window.location.href = `comments.html?requestId=${requestId}`;
+        }
+    </script>
+</body>
+</html>

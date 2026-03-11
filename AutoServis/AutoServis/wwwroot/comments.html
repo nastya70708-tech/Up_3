@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Комментарии к заявке</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="requests.html" class="back-link">← К заявкам</a>
+            <h1>Комментарии к заявке <span id="requestNumber"></span></h1>
+        </header>
+
+        <div id="notifications"></div>
+
+        <div class="section-header">
+            <h2>Комментарии мастера</h2>
+            <button class="btn btn-primary" onclick="showAddForm()">+ Добавить комментарий</button>
+        </div>
+
+        <div id="formContainer" class="form-container" style="display: none;">
+            <h3 id="formTitle">Новый комментарий</h3>
+            <form id="commentForm">
+                <input type="hidden" id="commentId">
+                <input type="hidden" id="requestId">
+
+                <div class="form-group">
+                    <label for="masterId">Мастер:</label>
+                    <select id="masterId" required>
+                        <option value="">Выберите мастера...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Комментарий:</label>
+                    <textarea id="message" required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn" onclick="hideForm()">Отмена</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Мастер</th>
+                        <th>Комментарий</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="commentsTableBody">
+                    <tr>
+                        <td colspan="4">Загрузка...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>const urlParams = new URLSearchParams(window.location.search);
+        const requestId = urlParams.get('requestId');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!requestId) {
+                showNotification('Не указан номер заявки', 'error');
+                return;
+            }
+
+            document.getElementById('requestId').value = requestId;
+            document.getElementById('requestNumber').textContent = `№${requestId}`;
+
+            loadComments();
+            loadSelectOptions('masterId', '/api/masters', 'masterID', 'fio');
+        });
+
+        async function loadComments() {
+            try {
+                const comments = await apiRequest('/api/comments');
+                const masters = await apiRequest('/api/masters');
+
+                const mastersMap = new Map(masters.map(m => [m.masterID, m]));
+                const requestComments = comments.filter(c => c.requestID == requestId);
+
+                const tbody = document.getElementById('commentsTableBody');
+
+                if (requestComments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">Нет комментариев</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = requestComments.map(comment => {
+                    const master = mastersMap.get(comment.masterID);
+                    return `
+                        <tr>
+                            <td>${comment.commentID}</td>
+                            <td>${master ? master.fio : 'Неизвестно'}</td>
+                            <td>${comment.message}</td>
+                            <td class="actions">
+                                <button onclick="editComment(${comment.commentID})">✏️</button>
+                                <button onclick="deleteComment(${comment.commentID})">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="4">Ошибка загрузки</td></tr>';
+            }
+        }
+
+        function showAddForm() {
+            document.getElementById('formTitle').textContent = 'Новый комментарий';
+            document.getElementById('commentForm').reset();
+            document.getElementById('commentId').value = '';
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function hideForm() {
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+        async function editComment(id) {
+            try {
+                const comment = await apiRequest(`/api/comments/${id}`);
+
+                document.getElementById('formTitle').textContent = 'Редактирование комментария';
+                document.getElementById('commentId').value = comment.commentID;
+                document.getElementById('masterId').value = comment.masterID;
+                document.getElementById('message').value = comment.message;
+
+                document.getElementById('formContainer').style.display = 'block';
+            } catch (error) {
+                showNotification('Ошибка загрузки', 'error');
+            }
+        }
+
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const commentData = {
+                commentID: document.getElementById('commentId').value ? parseInt(document.getElementById('commentId').value) : 0,
+                message: document.getElementById('message').value,
+                masterID: parseInt(document.getElementById('masterId').value),
+                requestID: parseInt(requestId)
+            };
+
+            try {
+                if (commentData.commentID) {
+                    await apiRequest('/api/comments', 'PUT', commentData);
+                    showNotification('Комментарий обновлен');
+                } else {
+                    delete commentData.commentID;
+                    await apiRequest('/api/comments', 'POST', commentData);
+                    showNotification('Комментарий добавлен');
+                }
+
+                hideForm();
+                loadComments();
+            } catch (error) {
+                showNotification('Ошибка сохранения', 'error');
+            }
+        });
+
+        async function deleteComment(id) {
+            if (!confirm('Удалить комментарий?')) return;
+
+            try {
+                await apiRequest(`/api/comments/${id}`, 'DELETE');
+                showNotification('Комментарий удален');
+                loadComments();
+            } catch (error) {
+                showNotification('Ошибка удаления', 'error');
+            }
+        }</script>
+</body>
+</html>

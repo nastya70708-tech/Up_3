@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автосервис - Учет заявок на ремонт</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Автосервис «АвтоТранс»</h1>
+                    <p>Система учета заявок на ремонт автомобилей</p>
+                </div>
+                <div id="userInfo" style="text-align: right;"></div>
+            </div>
+        </header>
+
+        <main>
+            <div id="notifications"></div>
+
+            <div id="roleSpecificContent">
+                <!-- Контент будет загружаться в зависимости от роли -->
+            </div>
+        </main>
+
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let currentUser = null;
+
+        // Загрузка информации о текущем пользователе
+        async function loadCurrentUser() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (!response.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUser = await response.json();
+
+                // Отображаем информацию о пользователе
+                const userInfo = document.getElementById('userInfo');
+                userInfo.innerHTML = `
+                        <p>Вы вошли как: <strong>${currentUser.name}</strong></p>
+                        <p>Роль: ${currentUser.role === 'master' ? 'Мастер' : 'Клиент'}</p>
+                        <button class="btn" onclick="logout()">Выйти</button>
+                    `;
+
+                // Загружаем контент в зависимости от роли
+                loadRoleContent();
+
+            } catch (error) {
+                console.error('Ошибка загрузки пользователя:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Загрузка контента в зависимости от роли
+        function loadRoleContent() {
+            const contentDiv = document.getElementById('roleSpecificContent');
+
+            if (currentUser.role === 'master') {
+                // Контент для мастера (полный доступ)
+                contentDiv.innerHTML = `
+                        <h2>Управление данными</h2>
+
+                        <div class="nav-grid">
+                            <a href="requests.html" class="nav-card">
+                                <h3>Заявки</h3>
+                                <p>Управление заявками на ремонт: создание, редактирование, отслеживание статуса</p>
+                            </a>
+
+                            <a href="clients.html" class="nav-card">
+                                <h3>Клиенты</h3>
+                                <p>Список клиентов автосервиса</p>
+                            </a>
+
+                            <a href="masters.html" class="nav-card">
+                                <h3>Мастера</h3>
+                                <p>Список автомехаников и их специализация</p>
+                            </a>
+
+                            <a href="comments.html" class="nav-card">
+                                <h3>Комментарии</h3>
+                                <p>Комментарии мастеров к заявкам</p>
+                            </a>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>Панель мастера</h3>
+                            <p>Вы можете управлять всеми заявками, назначать ответственных, добавлять комментарии и отмечать необходимые запчасти.</p>
+                        </div>
+                    `;
+            } else {
+                // Контент для клиента (ограниченный доступ)
+                contentDiv.innerHTML = `
+                        <h2>Мои заявки</h2>
+
+                        <div style="margin-bottom: 20px;">
+                            <a href="client-requests.html" class="btn btn-primary">📋 Мои заявки</a>
+                            <a href="masters.html" class="btn">🔧 Наши мастера</a>
+                        </div>
+
+                        <div class="info-section">
+                            <h3>Добро пожаловать, ${currentUser.name}!</h3>
+                            <p>Как клиент вы можете:</p>
+                            <ul>
+                                <li>Просматривать свои заявки на ремонт</li>
+                                <li>Создавать новые заявки</li>
+                                <li>Отслеживать статус выполнения</li>
+                                <li>Просматривать комментарии мастеров к вашим заявкам</li>
+                                <li>Смотреть список мастеров и их специализацию</li>
+                            </ul>
+                        </div>
+                    `;
+            }
+        }
+
+        // Выход из системы
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = 'login.html';
+            } catch (error) {
+                showNotification('Ошибка при выходе', 'error');
+            }
+        }
+
+        // Запуск при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadCurrentUser);
+    </script>
+</body>
+</html>

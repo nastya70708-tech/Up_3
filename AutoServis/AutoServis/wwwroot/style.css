@@ -1,0 +1,253 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: #f5f5f5;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    min-height: 100vh;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+header {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+header h1 {
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+header p {
+    color: #666;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #333;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Навигационная сетка на главной */
+.nav-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.nav-card {
+    display: block;
+    padding: 20px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.2s;
+}
+
+.nav-card:hover {
+    background: #eee;
+}
+
+.nav-card h3 {
+    margin-bottom: 10px;
+}
+
+.nav-card p {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Формы и таблицы */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    color: #333;
+    display: inline-block;
+}
+
+.btn:hover {
+    background: #e0e0e0;
+}
+
+.btn-primary {
+    background: #e0e0e0;
+    border-color: #999;
+}
+
+.btn-danger {
+    color: #c00;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Таблицы */
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: #f8f8f8;
+    font-weight: 600;
+}
+
+tr:hover {
+    background: #f8f8f8;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.actions button {
+    margin-right: 5px;
+    padding: 4px 8px;
+    background: none;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.actions button:hover {
+    background: #f0f0f0;
+}
+
+/* Статусы заявок */
+.status-new {
+    color: #0066cc;
+}
+
+.status-progress {
+    color: #cc6600;
+}
+
+.status-waiting {
+    color: #993399;
+}
+
+.status-completed {
+    color: #006633;
+}
+
+/* Уведомления */
+.notification {
+    padding: 12px;
+    margin: 20px 0;
+    background: #f8f8f8;
+    border: 1px solid #ccc;
+}
+
+.notification.success {
+    background: #f0f0f0;
+    border-color: #999;
+}
+
+.notification.error {
+    background: #fee;
+    border-color: #c00;
+    color: #c00;
+}
+
+/* Информационные секции */
+.info-section {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+}
+
+.info-section h3 {
+    margin-bottom: 15px;
+}
+
+.info-section ul {
+    margin-left: 20px;
+}
+
+footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+    color: #666;
+    font-size: 0.9em;
+}
