@@ -17,7 +17,7 @@
 
         <div class="section-header">
             <h2>Комментарии мастеров</h2>
-            <button class="btn btn-primary" onclick="showAddForm()">+ Добавить комментарий</button>
+            <button class="btn btn-primary" onclick="showAddForm()" id="addCommentBtn" style="display: none;">+ Добавить комментарий</button>
         </div>
 
         <div id="formContainer" class="form-container" style="display: none;">
@@ -61,9 +61,23 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const requestId = urlParams.get('requestId');
+        let currentUser = null;
         let currentCommentMasterId = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Проверяем авторизацию
+            try {
+                const response = await fetch('/api/current-user', { credentials: 'include' });
+                if (!response.ok) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = await response.json();
+            } catch (error) {
+                window.location.href = 'login.html';
+                return;
+            }
+
             if (!requestId) {
                 showNotification('Не указан номер заявки', 'error');
                 return;
@@ -72,18 +86,24 @@
             document.getElementById('requestId').value = requestId;
             document.getElementById('requestNumber').textContent = `№${requestId}`;
 
+            // Показываем кнопку добавления только мастерам
+            if (currentUser.role === 'master') {
+                document.getElementById('addCommentBtn').style.display = 'inline-block';
+            }
+
             loadComments();
         });
 
         async function loadComments() {
+            const tbody = document.getElementById('commentsTableBody');
+            if (!tbody) return;
+
             try {
                 const comments = await apiRequest('/api/comments');
                 const masters = await apiRequest('/api/masters');
 
                 const mastersMap = new Map(masters.map(m => [m.masterID, m]));
                 const requestComments = comments.filter(c => c.requestID == requestId);
-
-                const tbody = document.getElementById('commentsTableBody');
 
                 if (requestComments.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4">Нет комментариев</td></tr>';
@@ -92,20 +112,27 @@
 
                 tbody.innerHTML = requestComments.map(comment => {
                     const master = mastersMap.get(comment.masterID);
+                    // Кнопки действий только для мастеров (и только своих комментариев)
+                    let actionButtons = '';
+                    if (currentUser.role === 'master' && comment.masterID.toString() === currentUser.id) {
+                        actionButtons = `
+                                <button onclick="editComment(${comment.commentID})">✏️</button>
+                                <button onclick="deleteComment(${comment.commentID})">🗑️</button>
+                            `;
+                    }
+
                     return `
                             <tr>
                                 <td>${comment.commentID}</td>
-                                <td>${master ? master.fio : 'Неизвестно'}</td>
+                                <td>${master ? escapeHtml(master.fio) : 'Неизвестно'}</td>
                                 <td>${escapeHtml(comment.message)}</td>
-                                <td class="actions">
-                                    <button onclick="editComment(${comment.commentID})">✏️</button>
-                                    <button onclick="deleteComment(${comment.commentID})">🗑️</button>
-                                </td>
+                                <td class="actions">${actionButtons}</td>
                             </tr>
                         `;
                 }).join('');
             } catch (error) {
-                document.getElementById('commentsTableBody').innerHTML = '<tr><td colspan="4">Ошибка загрузки</td></tr>';
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="4">Ошибка загрузки</td></tr>';
             }
         }
 
@@ -123,7 +150,11 @@
         async function editComment(id) {
             try {
                 const comment = await apiRequest(`/api/comments/${id}`);
-                currentCommentMasterId = comment.masterID;
+                // Проверяем, что это комментарий текущего мастера
+                if (comment.masterID.toString() !== currentUser.id) {
+                    showNotification('Нельзя редактировать чужой комментарий', 'error');
+                    return;
+                }
 
                 document.getElementById('formTitle').textContent = 'Редактирование комментария';
                 document.getElementById('commentId').value = comment.commentID;
@@ -141,17 +172,17 @@
             const commentData = {
                 commentID: document.getElementById('commentId').value ? parseInt(document.getElementById('commentId').value) : 0,
                 message: document.getElementById('message').value,
-                masterID: currentCommentMasterId || 0,
                 requestID: parseInt(requestId)
             };
 
             try {
                 if (commentData.commentID) {
+                    // PUT запрос
                     await apiRequest('/api/comments', 'PUT', commentData);
                     showNotification('Комментарий обновлен');
                 } else {
+                    // POST запрос (masterID определится на сервере из сессии)
                     delete commentData.commentID;
-                    delete commentData.masterID; // Удаляем, чтобы сервер взял из сессии
                     await apiRequest('/api/comments', 'POST', commentData);
                     showNotification('Комментарий добавлен');
                 }
@@ -175,7 +206,6 @@
             }
         }
 
-        // Функция экранирования HTML
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');

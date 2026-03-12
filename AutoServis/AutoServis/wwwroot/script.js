@@ -8,6 +8,7 @@ async function apiRequest(url, method = 'GET', data = null) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',  // обязательно для передачи сессионных кук
     };
 
     if (data) {
@@ -18,13 +19,12 @@ async function apiRequest(url, method = 'GET', data = null) {
         const response = await fetch(url, options);
 
         if (response.status === 403) {
-            window.location.href = 'login.html';
+            // Не пытаемся редиректить сразу, дадим возможность обработать ошибку выше
             throw new Error('Доступ запрещен');
         }
 
         if (!response.ok) {
             if (response.status === 401) {
-                window.location.href = 'login.html';
                 throw new Error('Не авторизован');
             }
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -74,7 +74,6 @@ async function loadSelectOptions(selectId, apiUrl, valueField, textField, defaul
         select.innerHTML = `<option value="">${defaultText}</option>`;
         items.forEach(item => {
             const option = document.createElement('option');
-            // Исправлено: используем правильные названия полей
             option.value = item[valueField];
             option.textContent = item[textField];
             select.appendChild(option);
@@ -87,7 +86,7 @@ async function loadSelectOptions(selectId, apiUrl, valueField, textField, defaul
 // Выход из системы
 async function logout() {
     try {
-        await fetch('/api/logout', { method: 'POST' });
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
         window.location.href = 'login.html';
     } catch (error) {
         console.error('Ошибка при выходе:', error);

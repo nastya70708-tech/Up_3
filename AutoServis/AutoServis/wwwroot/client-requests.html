@@ -82,7 +82,7 @@
 
         async function checkAuth() {
             try {
-                const response = await fetch('/api/current-user');
+                const response = await fetch('/api/current-user', { credentials: 'include' });
                 if (!response.ok || (await response.json()).role !== 'client') {
                     window.location.href = 'login.html';
                     return false;
@@ -104,12 +104,13 @@
         });
 
         async function loadRequests() {
+            const tbody = document.getElementById('requestsTableBody');
+            if (!tbody) return;
+
             try {
                 const requests = await apiRequest('/api/requests');
                 const masters = await apiRequest('/api/masters');
                 const mastersMap = new Map(masters.map(m => [m.masterID, m]));
-
-                const tbody = document.getElementById('requestsTableBody');
 
                 if (requests.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7">У вас пока нет заявок</td></tr>';
@@ -118,7 +119,6 @@
 
                 tbody.innerHTML = requests.map(request => {
                     const master = mastersMap.get(request.masterID);
-
                     let statusClass = '';
                     switch (request.requestStatus) {
                         case 'Новая заявка': statusClass = 'status-new'; break;
@@ -129,21 +129,22 @@
                     }
 
                     return `
-                                    <tr>
-                                        <td>${request.requestID}</td>
-                                        <td>${formatDate(request.startDate)}</td>
-                                        <td>${request.carType} ${request.carModel}</td>
-                                        <td>${request.problemDescryption}</td>
-                                        <td>${master ? master.fio : 'Не назначен'}</td>
-                                        <td class="${statusClass}">${request.requestStatus}</td>
-                                        <td>
-                                            <button class="btn" onclick="viewComments(${request.requestID})">Просмотр</button>
-                                        </td>
-                                    </tr>
-                                `;
+                        <tr>
+                            <td>${request.requestID}</td>
+                            <td>${formatDate(request.startDate)}</td>
+                            <td>${escapeHtml(request.carType)} ${escapeHtml(request.carModel)}</td>
+                            <td>${escapeHtml(request.problemDescryption)}</td>
+                            <td>${master ? escapeHtml(master.fio) : 'Не назначен'}</td>
+                            <td class="${statusClass}">${escapeHtml(request.requestStatus)}</td>
+                            <td>
+                                <button class="btn" onclick="viewComments(${request.requestID})">Просмотр</button>
+                            </td>
+                        </tr>
+                    `;
                 }).join('');
             } catch (error) {
-                console.error('Ошибка загрузки заявок:', error);
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="7">Ошибка загрузки</td></tr>';
             }
         }
 
@@ -166,7 +167,7 @@
                 requestStatus: 'Новая заявка',
                 completionDate: null,
                 repairParts: null,
-                masterID: parseInt(document.getElementById('masterId').value),
+                masterID: document.getElementById('masterId').value ? parseInt(document.getElementById('masterId').value) : null,
                 clientID: parseInt(currentUser.id)
             };
 
@@ -183,6 +184,13 @@
 
         function viewComments(requestId) {
             window.location.href = `comments.html?requestId=${requestId}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

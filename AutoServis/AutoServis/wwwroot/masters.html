@@ -79,13 +79,15 @@
     </div>
 
     <script src="script.js"></script>
-    <script>document.addEventListener('DOMContentLoaded', loadMasters);
+    <script>
+        document.addEventListener('DOMContentLoaded', loadMasters);
 
         async function loadMasters() {
+            const tbody = document.getElementById('mastersTableBody');
+            if (!tbody) return;
+
             try {
                 const masters = await apiRequest('/api/masters');
-                const tbody = document.getElementById('mastersTableBody');
-
                 if (masters.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6">Нет мастеров</td></tr>';
                     return;
@@ -94,10 +96,10 @@
                 tbody.innerHTML = masters.map(master => `
                     <tr>
                         <td>${master.masterID}</td>
-                        <td>${master.fio}</td>
-                        <td>${master.phone}</td>
-                        <td>${master.login}</td>
-                        <td>${master.type}</td>
+                        <td>${escapeHtml(master.fio)}</td>
+                        <td>${escapeHtml(master.phone)}</td>
+                        <td>${escapeHtml(master.login)}</td>
+                        <td>${escapeHtml(master.type)}</td>
                         <td class="actions">
                             <button onclick="editMaster(${master.masterID})">✏️</button>
                             <button onclick="deleteMaster(${master.masterID})">🗑️</button>
@@ -105,6 +107,7 @@
                     </tr>
                 `).join('');
             } catch (error) {
+                console.error(error);
                 tbody.innerHTML = '<tr><td colspan="6">Ошибка загрузки</td></tr>';
             }
         }
@@ -177,6 +180,14 @@
             } catch (error) {
                 showNotification('Ошибка удаления', 'error');
             }
-        }</script>
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>

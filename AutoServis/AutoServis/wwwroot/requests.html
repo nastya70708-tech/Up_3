@@ -125,14 +125,14 @@
     </div>
 
     <script src="script.js"></script>
+    <!-- requests.html (фрагмент скрипта) -->
     <script>
         let currentUser = null;
         let isMaster = false;
 
-        // Загрузка информации о пользователе
         async function checkAuth() {
             try {
-                const response = await fetch('/api/current-user');
+                const response = await fetch('/api/current-user', { credentials: 'include' });
                 if (!response.ok) {
                     window.location.href = 'login.html';
                     return false;
@@ -141,25 +141,19 @@
                 currentUser = await response.json();
                 isMaster = currentUser.role === 'master';
 
-                // Отображаем роль
                 document.getElementById('userRoleInfo').innerHTML = `
-                        <p>Вы вошли как: <strong>${escapeHtml(currentUser.name)}</strong> (${isMaster ? '🔧 Мастер' : '👤 Клиент'})</p>
-                    `;
+                    <p>Вы вошли как: <strong>${escapeHtml(currentUser.name)}</strong> (${isMaster ? '🔧 Мастер' : '👤 Клиент'})</p>
+                `;
 
-                // Показываем/скрываем элементы в зависимости от роли
                 if (isMaster) {
                     document.getElementById('addButton').style.display = 'inline-block';
                     document.getElementById('statisticsSection').style.display = 'block';
                     document.getElementById('requestsTitle').textContent = 'Все заявки';
-
-                    // Для мастера поле клиента обязательно
                     document.getElementById('clientId').required = true;
                     document.getElementById('clientSelectGroup').style.display = 'block';
                 } else {
                     document.getElementById('clientSelectGroup').style.display = 'none';
                     document.getElementById('requestsTitle').textContent = 'Мои заявки';
-
-                    // Для клиента поле клиента необязательно (и скрыто)
                     document.getElementById('clientId').required = false;
                 }
 
@@ -170,7 +164,6 @@
             }
         }
 
-        // Загрузка данных при открытии страницы
         document.addEventListener('DOMContentLoaded', async () => {
             const authed = await checkAuth();
             if (authed) {
@@ -182,8 +175,10 @@
             }
         });
 
-        // Загрузка списка заявок
         async function loadRequests() {
+            const tbody = document.getElementById('requestsTableBody');
+            if (!tbody) return;
+
             try {
                 const requests = await apiRequest('/api/requests');
                 const clients = await apiRequest('/api/clients');
@@ -191,8 +186,6 @@
 
                 const clientsMap = new Map(clients.map(c => [c.userID, c]));
                 const mastersMap = new Map(masters.map(m => [m.masterID, m]));
-
-                const tbody = document.getElementById('requestsTableBody');
 
                 if (requests.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="9">Нет заявок</td></tr>';
@@ -206,7 +199,6 @@
                     const client = clientsMap.get(request.clientID);
                     const master = mastersMap.get(request.masterID);
 
-                    // Расчет статистики для выполненных заявок
                     if (isMaster && request.requestStatus === 'Завершена' && request.completionDate) {
                         completedCount++;
                         const start = new Date(request.startDate);
@@ -215,7 +207,6 @@
                         totalDays += days;
                     }
 
-                    // Определение класса для статуса
                     let statusClass = '';
                     switch (request.requestStatus) {
                         case 'Новая заявка': statusClass = 'status-new'; break;
@@ -225,36 +216,34 @@
                         case 'Завершена': statusClass = 'status-completed'; break;
                     }
 
-                    // Кнопки действий в зависимости от роли
                     let actionButtons = '';
                     if (isMaster) {
                         actionButtons = `
-                                <button onclick="editRequest(${request.requestID})">✏️</button>
-                                <button onclick="deleteRequest(${request.requestID})">🗑️</button>
-                                <button onclick="viewComments(${request.requestID})">💬</button>
-                            `;
+                            <button onclick="editRequest(${request.requestID})">✏️</button>
+                            <button onclick="deleteRequest(${request.requestID})">🗑️</button>
+                            <button onclick="viewComments(${request.requestID})">💬</button>
+                        `;
                     } else {
                         actionButtons = `
-                                <button onclick="viewComments(${request.requestID})">💬 Просмотр комментариев</button>
-                            `;
+                            <button onclick="viewComments(${request.requestID})">💬 Просмотр комментариев</button>
+                        `;
                     }
 
                     return `
-                            <tr>
-                                <td>${escapeHtml(request.requestID)}</td>
-                                <td>${formatDate(request.startDate)}</td>
-                                <td>${client ? escapeHtml(client.fio) : 'Неизвестно'}</td>
-                                <td>${escapeHtml(request.carType)} ${escapeHtml(request.carModel)}</td>
-                                <td>${escapeHtml(request.problemDescryption.substring(0, 50))}${request.problemDescryption.length > 50 ? '...' : ''}</td>
-                                <td>${master ? escapeHtml(master.fio) : 'Не назначен'}</td>
-                                <td class="${statusClass}">${escapeHtml(request.requestStatus)}</td>
-                                <td>${request.repairParts ? escapeHtml(request.repairParts.substring(0, 30)) + (request.repairParts.length > 30 ? '...' : '') : '-'}</td>
-                                <td class="actions">${actionButtons}</td>
-                            </tr>
-                        `;
+                        <tr>
+                            <td>${escapeHtml(request.requestID)}</td>
+                            <td>${formatDate(request.startDate)}</td>
+                            <td>${client ? escapeHtml(client.fio) : 'Неизвестно'}</td>
+                            <td>${escapeHtml(request.carType)} ${escapeHtml(request.carModel)}</td>
+                            <td>${escapeHtml(request.problemDescryption.substring(0, 50))}${request.problemDescryption.length > 50 ? '...' : ''}</td>
+                            <td>${master ? escapeHtml(master.fio) : 'Не назначен'}</td>
+                            <td class="${statusClass}">${escapeHtml(request.requestStatus)}</td>
+                            <td>${request.repairParts ? escapeHtml(request.repairParts.substring(0, 30)) + (request.repairParts.length > 30 ? '...' : '') : '-'}</td>
+                            <td class="actions">${actionButtons}</td>
+                        </tr>
+                    `;
                 }).join('');
 
-                // Обновление статистики для мастеров
                 if (isMaster) {
                     document.getElementById('completedCount').textContent = completedCount;
                     document.getElementById('avgTime').textContent =
@@ -262,16 +251,13 @@
                 }
 
             } catch (error) {
-                console.error('Ошибка загрузки заявок:', error);
-                document.getElementById('requestsTableBody').innerHTML =
-                    '<tr><td colspan="9">Ошибка загрузки данных</td></tr>';
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="9">Ошибка загрузки данных</td></tr>';
             }
         }
 
-        // Показать форму добавления (только для мастеров)
         function showAddForm() {
             if (!isMaster) return;
-
             document.getElementById('formTitle').textContent = 'Новая заявка';
             document.getElementById('requestForm').reset();
             document.getElementById('requestId').value = '';
@@ -283,10 +269,8 @@
             document.getElementById('formContainer').style.display = 'none';
         }
 
-        // Редактирование заявки (только для мастеров)
         async function editRequest(id) {
             if (!isMaster) return;
-
             try {
                 const request = await apiRequest(`/api/requests/${id}`);
 
@@ -299,9 +283,9 @@
                 document.getElementById('requestStatus').value = request.requestStatus;
                 document.getElementById('completionDate').value = request.completionDate ? request.completionDate.split('T')[0] : '';
                 document.getElementById('repairParts').value = request.repairParts || '';
-                document.getElementById('masterId').value = request.masterID;
+                document.getElementById('masterId').value = request.masterID || '';
                 if (isMaster) {
-                    document.getElementById('clientId').value = request.clientID;
+                    document.getElementById('clientId').value = request.clientID || '';
                 }
 
                 document.getElementById('formContainer').style.display = 'block';
@@ -310,7 +294,6 @@
             }
         }
 
-        // Сохранение заявки
         document.getElementById('requestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -323,17 +306,17 @@
                 requestStatus: document.getElementById('requestStatus').value,
                 completionDate: document.getElementById('completionDate').value || null,
                 repairParts: document.getElementById('repairParts').value || null,
-                masterID: parseInt(document.getElementById('masterId').value) || null,
-                clientID: isMaster ? parseInt(document.getElementById('clientId').value) : parseInt(currentUser.id)
+                masterID: document.getElementById('masterId').value ? parseInt(document.getElementById('masterId').value) : null,
+                clientID: isMaster
+                    ? (document.getElementById('clientId').value ? parseInt(document.getElementById('clientId').value) : null)
+                    : parseInt(currentUser.id)
             };
 
             try {
                 if (requestData.requestID) {
-                    // Обновление
                     await apiRequest('/api/requests', 'PUT', requestData);
                     showNotification('Заявка обновлена');
                 } else {
-                    // Создание
                     delete requestData.requestID;
                     await apiRequest('/api/requests', 'POST', requestData);
                     showNotification('Заявка создана');
@@ -346,7 +329,6 @@
             }
         });
 
-        // Удаление заявки (только для мастеров)
         async function deleteRequest(id) {
             if (!isMaster) return;
             if (!confirm('Удалить заявку?')) return;
@@ -360,12 +342,10 @@
             }
         }
 
-        // Переход к комментариям
         function viewComments(requestId) {
             window.location.href = `comments.html?requestId=${requestId}`;
         }
 
-        // Функция экранирования HTML
         function escapeHtml(text) {
             if (text === null || text === undefined) return '';
             const div = document.createElement('div');
