@@ -1,6 +1,6 @@
-wwwroot\client-requests.html
-wwwroot\clients.html
+wwwroot\requests.html
 wwwroot\comments.html
+wwwroot\clients.html
 wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\index.html
@@ -64,6 +64,6 @@ wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
 wwwroot\login.html
 wwwroot\masters.html
-wwwroot\requests.html
+wwwroot\client-requests.html
 wwwroot\script.js
 wwwroot\style.css

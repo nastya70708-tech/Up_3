@@ -16,7 +16,7 @@
         <div id="notifications"></div>
 
         <div class="section-header">
-            <h2>Комментарии мастера</h2>
+            <h2>Комментарии мастеров</h2>
             <button class="btn btn-primary" onclick="showAddForm()">+ Добавить комментарий</button>
         </div>
 
@@ -25,13 +25,6 @@
             <form id="commentForm">
                 <input type="hidden" id="commentId">
                 <input type="hidden" id="requestId">
-
-                <div class="form-group">
-                    <label for="masterId">Мастер:</label>
-                    <select id="masterId" required>
-                        <option value="">Выберите мастера...</option>
-                    </select>
-                </div>
 
                 <div class="form-group">
                     <label for="message">Комментарий:</label>
@@ -65,8 +58,10 @@
     </div>
 
     <script src="script.js"></script>
-    <script>const urlParams = new URLSearchParams(window.location.search);
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
         const requestId = urlParams.get('requestId');
+        let currentCommentMasterId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!requestId) {
@@ -78,7 +73,6 @@
             document.getElementById('requestNumber').textContent = `№${requestId}`;
 
             loadComments();
-            loadSelectOptions('masterId', '/api/masters', 'masterID', 'fio');
         });
 
         async function loadComments() {
@@ -99,19 +93,19 @@
                 tbody.innerHTML = requestComments.map(comment => {
                     const master = mastersMap.get(comment.masterID);
                     return `
-                        <tr>
-                            <td>${comment.commentID}</td>
-                            <td>${master ? master.fio : 'Неизвестно'}</td>
-                            <td>${comment.message}</td>
-                            <td class="actions">
-                                <button onclick="editComment(${comment.commentID})">✏️</button>
-                                <button onclick="deleteComment(${comment.commentID})">🗑️</button>
-                            </td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td>${comment.commentID}</td>
+                                <td>${master ? master.fio : 'Неизвестно'}</td>
+                                <td>${escapeHtml(comment.message)}</td>
+                                <td class="actions">
+                                    <button onclick="editComment(${comment.commentID})">✏️</button>
+                                    <button onclick="deleteComment(${comment.commentID})">🗑️</button>
+                                </td>
+                            </tr>
+                        `;
                 }).join('');
             } catch (error) {
-                tbody.innerHTML = '<tr><td colspan="4">Ошибка загрузки</td></tr>';
+                document.getElementById('commentsTableBody').innerHTML = '<tr><td colspan="4">Ошибка загрузки</td></tr>';
             }
         }
 
@@ -129,10 +123,10 @@
         async function editComment(id) {
             try {
                 const comment = await apiRequest(`/api/comments/${id}`);
+                currentCommentMasterId = comment.masterID;
 
                 document.getElementById('formTitle').textContent = 'Редактирование комментария';
                 document.getElementById('commentId').value = comment.commentID;
-                document.getElementById('masterId').value = comment.masterID;
                 document.getElementById('message').value = comment.message;
 
                 document.getElementById('formContainer').style.display = 'block';
@@ -147,7 +141,7 @@
             const commentData = {
                 commentID: document.getElementById('commentId').value ? parseInt(document.getElementById('commentId').value) : 0,
                 message: document.getElementById('message').value,
-                masterID: parseInt(document.getElementById('masterId').value),
+                masterID: currentCommentMasterId || 0,
                 requestID: parseInt(requestId)
             };
 
@@ -157,6 +151,7 @@
                     showNotification('Комментарий обновлен');
                 } else {
                     delete commentData.commentID;
+                    delete commentData.masterID; // Удаляем, чтобы сервер взял из сессии
                     await apiRequest('/api/comments', 'POST', commentData);
                     showNotification('Комментарий добавлен');
                 }
@@ -178,6 +173,15 @@
             } catch (error) {
                 showNotification('Ошибка удаления', 'error');
             }
-        }</script>
+        }
+
+        // Функция экранирования HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>

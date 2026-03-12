@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿<!-- Полный файл requests.html с исправлениями -->
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -21,7 +22,7 @@
             <button class="btn btn-primary" onclick="showAddForm()" id="addButton" style="display: none;">+ Новая заявка</button>
         </div>
 
-        <!-- Форма добавления/редактирования (только для мастеров) -->
+        <!-- Форма добавления/редактирования -->
         <div id="formContainer" class="form-container" style="display: none;">
             <h3 id="formTitle">Новая заявка</h3>
             <form id="requestForm">
@@ -34,14 +35,14 @@
 
                 <div class="form-group" id="clientSelectGroup">
                     <label for="clientId">Клиент:</label>
-                    <select id="clientId" required>
+                    <select id="clientId">
                         <option value="">Выберите клиента...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="masterId">Ответственный мастер:</label>
-                    <select id="masterId" required>
+                    <select id="masterId">
                         <option value="">Выберите мастера...</option>
                     </select>
                 </div>
@@ -142,17 +143,24 @@
 
                 // Отображаем роль
                 document.getElementById('userRoleInfo').innerHTML = `
-                            <p>Вы вошли как: <strong>${currentUser.name}</strong> (${isMaster ? '🔧 Мастер' : '👤 Клиент'})</p>
-                        `;
+                        <p>Вы вошли как: <strong>${escapeHtml(currentUser.name)}</strong> (${isMaster ? '🔧 Мастер' : '👤 Клиент'})</p>
+                    `;
 
                 // Показываем/скрываем элементы в зависимости от роли
                 if (isMaster) {
                     document.getElementById('addButton').style.display = 'inline-block';
                     document.getElementById('statisticsSection').style.display = 'block';
                     document.getElementById('requestsTitle').textContent = 'Все заявки';
+
+                    // Для мастера поле клиента обязательно
+                    document.getElementById('clientId').required = true;
+                    document.getElementById('clientSelectGroup').style.display = 'block';
                 } else {
                     document.getElementById('clientSelectGroup').style.display = 'none';
                     document.getElementById('requestsTitle').textContent = 'Мои заявки';
+
+                    // Для клиента поле клиента необязательно (и скрыто)
+                    document.getElementById('clientId').required = false;
                 }
 
                 return true;
@@ -221,29 +229,29 @@
                     let actionButtons = '';
                     if (isMaster) {
                         actionButtons = `
-                                    <button onclick="editRequest(${request.requestID})">✏️</button>
-                                    <button onclick="deleteRequest(${request.requestID})">🗑️</button>
-                                    <button onclick="viewComments(${request.requestID})">💬</button>
-                                `;
+                                <button onclick="editRequest(${request.requestID})">✏️</button>
+                                <button onclick="deleteRequest(${request.requestID})">🗑️</button>
+                                <button onclick="viewComments(${request.requestID})">💬</button>
+                            `;
                     } else {
                         actionButtons = `
-                                    <button onclick="viewComments(${request.requestID})">💬 Просмотр комментариев</button>
-                                `;
+                                <button onclick="viewComments(${request.requestID})">💬 Просмотр комментариев</button>
+                            `;
                     }
 
                     return `
-                                <tr>
-                                    <td>${request.requestID}</td>
-                                    <td>${formatDate(request.startDate)}</td>
-                                    <td>${client ? client.fio : 'Неизвестно'}</td>
-                                    <td>${request.carType} ${request.carModel}</td>
-                                    <td>${request.problemDescryption.substring(0, 50)}${request.problemDescryption.length > 50 ? '...' : ''}</td>
-                                    <td>${master ? master.fio : 'Не назначен'}</td>
-                                    <td class="${statusClass}">${request.requestStatus}</td>
-                                    <td>${request.repairParts ? request.repairParts.substring(0, 30) + (request.repairParts.length > 30 ? '...' : '') : '-'}</td>
-                                    <td class="actions">${actionButtons}</td>
-                                </tr>
-                            `;
+                            <tr>
+                                <td>${escapeHtml(request.requestID)}</td>
+                                <td>${formatDate(request.startDate)}</td>
+                                <td>${client ? escapeHtml(client.fio) : 'Неизвестно'}</td>
+                                <td>${escapeHtml(request.carType)} ${escapeHtml(request.carModel)}</td>
+                                <td>${escapeHtml(request.problemDescryption.substring(0, 50))}${request.problemDescryption.length > 50 ? '...' : ''}</td>
+                                <td>${master ? escapeHtml(master.fio) : 'Не назначен'}</td>
+                                <td class="${statusClass}">${escapeHtml(request.requestStatus)}</td>
+                                <td>${request.repairParts ? escapeHtml(request.repairParts.substring(0, 30)) + (request.repairParts.length > 30 ? '...' : '') : '-'}</td>
+                                <td class="actions">${actionButtons}</td>
+                            </tr>
+                        `;
                 }).join('');
 
                 // Обновление статистики для мастеров
@@ -315,7 +323,7 @@
                 requestStatus: document.getElementById('requestStatus').value,
                 completionDate: document.getElementById('completionDate').value || null,
                 repairParts: document.getElementById('repairParts').value || null,
-                masterID: parseInt(document.getElementById('masterId').value),
+                masterID: parseInt(document.getElementById('masterId').value) || null,
                 clientID: isMaster ? parseInt(document.getElementById('clientId').value) : parseInt(currentUser.id)
             };
 
@@ -355,6 +363,14 @@
         // Переход к комментариям
         function viewComments(requestId) {
             window.location.href = `comments.html?requestId=${requestId}`;
+        }
+
+        // Функция экранирования HTML
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
     </script>
 </body>

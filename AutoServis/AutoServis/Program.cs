@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations; // Добавляем для атрибутов
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 internal class Program
 {
@@ -38,7 +39,7 @@ internal class Program
         app.UseStaticFiles();
         app.UseSession();
 
-        // Глобальный обработчик ошибок (middleware)
+        // Обработка ошибок
         app.Use(async (context, next) =>
         {
             try
@@ -60,7 +61,7 @@ internal class Program
             }
         });
 
-        // === АВТОРИЗАЦИЯ ===
+        // Авторизация
         app.MapPost("/api/login", async (ApplicationDbContext db, HttpContext http, LoginRequest login, ILogger<Program> logger) =>
         {
             try
@@ -167,7 +168,7 @@ internal class Program
             }
         });
 
-        // === GET ALL ===
+        // GET все записи
         app.MapGet("/api/clients", async (ApplicationDbContext db, HttpContext http, ILogger<Program> logger) =>
         {
             try
@@ -287,7 +288,7 @@ internal class Program
             }
         });
 
-        // === GET BY ID ===
+        // GET по айди
         app.MapGet("/api/clients/{id}", async (ApplicationDbContext db, HttpContext http, int id, ILogger<Program> logger) =>
         {
             try
@@ -424,7 +425,8 @@ internal class Program
             }
         });
 
-        // === POST ===
+
+        // POST
         app.MapPost("/api/clients", async (ApplicationDbContext db, HttpContext http, Client client, ILogger<Program> logger) =>
         {
             try
@@ -625,7 +627,7 @@ internal class Program
             }
         });
 
-        // === PUT ===
+        // PUT
         app.MapPut("/api/clients", async (ApplicationDbContext db, HttpContext http, Client clientData, ILogger<Program> logger) =>
         {
             try
@@ -853,7 +855,7 @@ internal class Program
             }
         });
 
-        // === DELETE ===
+        // DELETE
         app.MapDelete("/api/clients/{id}", async (ApplicationDbContext db, HttpContext http, int id, ILogger<Program> logger) =>
         {
             try
@@ -1031,7 +1033,7 @@ internal class Program
     }
 }
 
-// === Модели с атрибутами ===
+// Модели с атрибутами
 public class LoginRequest
 {
     public string? Login { get; set; }
@@ -1040,7 +1042,8 @@ public class LoginRequest
 
 public class Client
 {
-    [Key] // Явно указываем первичный ключ
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int UserID { get; set; }
     public string? Fio { get; set; }
     public string? Phone { get; set; }
@@ -1050,7 +1053,8 @@ public class Client
 
 public class Master
 {
-    [Key] // Явно указываем первичный ключ
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int MasterID { get; set; }
     public string? Fio { get; set; }
     public string? Phone { get; set; }
@@ -1061,7 +1065,8 @@ public class Master
 
 public class Request
 {
-    [Key] // Явно указываем первичный ключ
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int RequestID { get; set; }
     public DateTime StartDate { get; set; }
     public string? CarType { get; set; }
@@ -1076,14 +1081,14 @@ public class Request
 
 public class Comment
 {
-    [Key] // Явно указываем первичный ключ
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int CommentID { get; set; }
     public string? Message { get; set; }
     public int MasterID { get; set; }
     public int RequestID { get; set; }
 }
 
-// === Контекст базы данных ===
 public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -1104,10 +1109,11 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Request>().ToTable("Requests");
         modelBuilder.Entity<Comment>().ToTable("Comments");
 
-        // Настройка соответствия свойств столбцам (если в БД имена с маленькой буквы)
+        // Настройка соответствия свойств столбцам и автоинкремента
         modelBuilder.Entity<Client>(entity =>
         {
             entity.Property(e => e.UserID).HasColumnName("userID");
+            entity.Property(e => e.UserID).ValueGeneratedOnAdd();
             entity.Property(e => e.Fio).HasColumnName("fio");
             entity.Property(e => e.Phone).HasColumnName("phone");
             entity.Property(e => e.Login).HasColumnName("login");
@@ -1117,6 +1123,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Master>(entity =>
         {
             entity.Property(e => e.MasterID).HasColumnName("masterID");
+            entity.Property(e => e.MasterID).ValueGeneratedOnAdd();
             entity.Property(e => e.Fio).HasColumnName("fio");
             entity.Property(e => e.Phone).HasColumnName("phone");
             entity.Property(e => e.Login).HasColumnName("login");
@@ -1127,6 +1134,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Request>(entity =>
         {
             entity.Property(e => e.RequestID).HasColumnName("requestID");
+            entity.Property(e => e.RequestID).ValueGeneratedOnAdd();
             entity.Property(e => e.StartDate).HasColumnName("startDate");
             entity.Property(e => e.CarType).HasColumnName("carType");
             entity.Property(e => e.CarModel).HasColumnName("carModel");
@@ -1141,6 +1149,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Comment>(entity =>
         {
             entity.Property(e => e.CommentID).HasColumnName("commentID");
+            entity.Property(e => e.CommentID).ValueGeneratedOnAdd();
             entity.Property(e => e.Message).HasColumnName("message");
             entity.Property(e => e.MasterID).HasColumnName("masterID");
             entity.Property(e => e.RequestID).HasColumnName("requestID");
